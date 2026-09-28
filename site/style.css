@@ -1,0 +1,256 @@
+:root {
+  --bg: #f6f4ec;
+  --surface: #fffdf7;
+  --text: #1f2a22;
+  --muted: #66705f;
+  --line: #e2ddcc;
+  --turf: #1e6b43;
+  --turf-strong: #15522f;
+  --turf-soft: #e3efe4;
+  --gold: #c7972b;
+  --shadow: 0 1px 2px rgb(30 40 30 / 0.06), 0 4px 16px rgb(30 40 30 / 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121714;
+    --surface: #1a211c;
+    --text: #e8ece4;
+    --muted: #9aa596;
+    --line: #2b352e;
+    --turf: #3fa56d;
+    --turf-strong: #58bd84;
+    --turf-soft: #1f3327;
+    --gold: #e0b44d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.6;
+}
+
+button, select { font: inherit; color: inherit; }
+
+/* ヘッダー：芝コースの外ラチ風に白い線を 2 本 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--turf);
+  color: #fff;
+  box-shadow: inset 0 -3px 0 rgb(255 255 255 / 0.85), inset 0 -6px 0 var(--turf-strong);
+}
+.header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.logo__mark { font-size: 1.6rem; }
+.logo__text b { color: #ffe08a; margin-left: 2px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: transform 0.1s, background 0.15s;
+}
+.btn:hover { background: var(--turf-soft); }
+.btn:active { transform: scale(0.97); }
+.btn--primary {
+  border: 0;
+  background: var(--gold);
+  color: #2a1f05;
+  padding: 9px 18px;
+}
+.btn--primary:hover { background: #d9a93a; }
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.tabs {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.tab {
+  border: 0;
+  background: none;
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.tab[aria-current="true"] { background: var(--turf); color: #fff; }
+
+.format {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.format select {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.horses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.chip small { color: var(--muted); font-size: 0.75rem; }
+.chip[aria-pressed="true"] { background: var(--turf); border-color: var(--turf); color: #fff; }
+.chip[aria-pressed="true"] small { color: rgb(255 255 255 / 0.75); }
+
+.empty {
+  margin-top: 48px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* 画像の縦横比がまちまちなので、切り抜かずに段組みで並べる */
+.grid {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  columns: 4 240px;
+  column-gap: 14px;
+}
+.card {
+  break-inside: avoid;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card__btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: copy;
+}
+.card__btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.25s;
+}
+.card__btn:hover img { transform: scale(1.03); }
+.card__hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.card__btn:hover .card__hint,
+.card__btn:focus-visible .card__hint { opacity: 1; }
+.card__btn:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+.card__name {
+  display: block;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-top: 3px solid var(--turf-soft);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 10px 10px;
+  border-radius: 14px;
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.25);
+  transform: translate(-50%, 140%);
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  max-width: calc(100vw - 32px);
+}
+.toast.is-visible { transform: translate(-50%, 0); }
+.toast__img { width: 64px; height: 44px; object-fit: cover; border-radius: 8px; }
+.toast p { margin: 0; }
+.toast__title { font-weight: 700; }
+.toast__text { font-size: 0.8rem; opacity: 0.75; }
+
+@media (max-width: 560px) {
+  .logo { font-size: 1.1rem; }
+  .format { margin-left: 0; }
+  .grid { columns: 2; column-gap: 10px; }
+  .card { margin-bottom: 10px; }
+}

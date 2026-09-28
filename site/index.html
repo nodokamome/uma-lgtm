@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ウマLGTM</title>
+  <meta name="description" content="競走馬の LGTM 画像。クリックで GitHub Markdown をコピー。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏇</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <a class="logo" href="./">
+        <span class="logo__mark" aria-hidden="true">🏇</span>
+        <span class="logo__text">ウマ<b>LGTM</b></span>
+      </a>
+      <button class="btn btn--primary" id="random-copy" type="button" title="ショートカット: R">
+        ランダムコピー
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="toolbar">
+      <nav class="tabs" aria-label="表示切替">
+        <button class="tab" type="button" data-view="random">ランダム</button>
+        <button class="tab" type="button" data-view="latest">新着順</button>
+      </nav>
+      <button class="btn" id="shuffle" type="button">🔀 シャッフル</button>
+      <label class="format">
+        <span>コピー形式</span>
+        <select id="format">
+          <option value="markdown">Markdown</option>
+          <option value="html">HTML (幅指定)</option>
+          <option value="url">URL</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="horses" id="horses" aria-label="馬名で絞り込み"></div>
+
+    <p class="empty" id="empty" hidden>
+      まだ画像がありません。<code>photos/</code> に馬の写真を追加してビルドしてください。
+    </p>
+    <ul class="grid" id="grid"></ul>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <img class="toast__img" alt="">
+    <div>
+      <p class="toast__title">コピーしました</p>
+      <p class="toast__text"></p>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
