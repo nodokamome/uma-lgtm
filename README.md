@@ -54,3 +54,9 @@ npm run dev   # → http://localhost:8080/
 ## 公開の初回設定
 
 リポジトリの Settings → Pages → Source を **GitHub Actions** にしてください。
+
+## フォント
+
+LGTM の文字は [Racing Sans One](https://fonts.google.com/specimen/Racing+Sans+One)（SIL Open Font License、[fonts/OFL.txt](fonts/OFL.txt)）です。
+ビルド時に図形へ変換して合成するので、環境によって見た目が変わることはありません。
+別のフォントにしたいときは `fonts/` に TTF/OTF を置き、[scripts/build.mjs](scripts/build.mjs) の `FONT_FILE` を書き換えてください。

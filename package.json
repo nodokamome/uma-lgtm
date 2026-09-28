@@ -10,6 +10,7 @@
     "dev": "node scripts/build.mjs && node scripts/serve.mjs"
   },
   "dependencies": {
+    "opentype.js": "^2.0.0",
     "sharp": "^0.35.5"
   }
 }

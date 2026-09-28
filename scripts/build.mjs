@@ -11,8 +11,10 @@
 
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import opentype from 'opentype.js';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -24,17 +26,29 @@ const OUT_DIR = path.join(DIST_DIR, 'lgtm');
 const MAX_SIZE = 500;
 const EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.tif', '.tiff']);
 
-// LGTM の字形。高さ 100 の座標系で中心線を描き、太い線で塗る。
-// フォントに依存しないのでローカルでも CI でも同じ見た目になる。
-const STROKE = 18;
-const GAP = 14;
-const GLYPHS = [
-  { w: 71, d: 'M9 9V91H62' },
-  { w: 90, d: 'M68.1 18.6A36 41 0 1 0 81 50H52' },
-  { w: 86, d: 'M9 9H77M43 9V91' },
-  { w: 90, d: 'M9 91V9L45 58L81 9V91' },
-];
-const TEXT_WIDTH = GLYPHS.reduce((sum, g) => sum + g.w, 0) + GAP * (GLYPHS.length - 1);
+// LGTM の文字はフォントから図形（パス）に変換して描く。
+// システムのフォントに依存しないのでローカルでも CI でも同じ見た目になる。
+// フォントを変えるときは fonts/ に TTF/OTF を置いてここを書き換える。
+const FONT_FILE = path.join(ROOT, 'fonts', 'RacingSansOne-Regular.ttf');
+const TRACKING = 4; // 字間（フォントサイズ 100 に対する値）
+
+function lgtmPath() {
+  const buf = readFileSync(FONT_FILE);
+  const font = opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+  // font.getPath() は一部フォントの GSUB で落ちるので、1 字ずつ並べてカーニングだけ効かせる
+  const glyphs = [...'LGTM'].map((c) => font.charToGlyph(c));
+  const unit = 100 / font.unitsPerEm;
+  const p = new opentype.Path();
+  let x = 0;
+  glyphs.forEach((g, i) => {
+    p.extend(g.getPath(x, 0, 100));
+    const kern = glyphs[i + 1] ? font.getKerningValue(g, glyphs[i + 1]) : 0;
+    x += (g.advanceWidth + kern) * unit + TRACKING;
+  });
+  const { x1, y1, x2, y2 } = p.getBoundingBox();
+  return { d: p.toPathData(2), x1, y1, w: x2 - x1, h: y2 - y1 };
+}
+const LGTM = lgtmPath();
 
 const escapeXml = (s) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c]);
@@ -59,25 +73,20 @@ function creditSvg(width, height, credit) {
 }
 
 function overlaySvg(width, height, credit) {
-  const scale = Math.min((width * 0.72) / TEXT_WIDTH, (height * 0.34) / 100);
-  const tx = (width - TEXT_WIDTH * scale) / 2;
-  const ty = (height - 100 * scale) / 2;
+  const scale = Math.min((width * 0.74) / LGTM.w, (height * 0.36) / LGTM.h);
+  const tx = (width - LGTM.w * scale) / 2 - LGTM.x1 * scale;
+  const ty = (height - LGTM.h * scale) / 2 - LGTM.y1 * scale;
+  // 縁取りの太さは文字の大きさに比例させる（画像サイズが違っても同じ印象になるように）
+  const outline = LGTM.w * 0.018;
 
-  let x = 0;
-  const paths = GLYPHS.map((g) => {
-    const p = `<path d="${g.d}" transform="translate(${x} 0)"/>`;
-    x += g.w + GAP;
-    return p;
-  }).join('');
-
-  const common = 'fill="none" stroke-linecap="round" stroke-linejoin="round"';
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
   <defs><filter id="s" x="-20%" y="-20%" width="140%" height="140%">
-    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.45"/>
+    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
   </filter></defs>
   <g transform="translate(${tx} ${ty}) scale(${scale})">
-    <g ${common} stroke="#1b1b1b" stroke-opacity="0.7" stroke-width="${STROKE + 9}" filter="url(#s)">${paths}</g>
-    <g ${common} stroke="#fff" stroke-width="${STROKE}">${paths}</g>
+    <path d="${LGTM.d}" fill="#1b1b1b" stroke="#1b1b1b" stroke-opacity="0.75" stroke-width="${outline}"
+      stroke-linejoin="round" filter="url(#s)"/>
+    <path d="${LGTM.d}" fill="#fff"/>
   </g>
   ${creditSvg(width, height, credit)}
 </svg>`);
