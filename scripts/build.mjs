@@ -29,7 +29,7 @@ const EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '
 // LGTM の文字はフォントから図形（パス）に変換して描く。
 // システムのフォントに依存しないのでローカルでも CI でも同じ見た目になる。
 // フォントを変えるときは fonts/ に TTF/OTF を置いてここを書き換える。
-const FONT_FILE = path.join(ROOT, 'fonts', 'RacingSansOne-Regular.ttf');
+const FONT_FILE = path.join(ROOT, 'fonts', 'BlackOpsOne-Regular.ttf');
 const TRACKING = 4; // 字間（フォントサイズ 100 に対する値）
 
 function lgtmPath() {
