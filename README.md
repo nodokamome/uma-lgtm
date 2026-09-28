@@ -2,7 +2,25 @@
 
 競走馬の LGTM 画像サイト（自分用）。画像をクリックすると `![LGTM](...)` がコピーされるので、PR レビューにそのまま貼れます。
 
-## 画像の追加
+公開先: https://nodokamome.github.io/uma-lgtm/
+
+## 写真の取り込み（Wikimedia Commons）
+
+写真は [Wikimedia Commons](https://commons.wikimedia.org/) の自由ライセンス（CC0 / パブリックドメイン / CC BY / CC BY-SA）のものだけを使っています。
+netkeiba や Google 画像検索の写真は著作権があり転載できないため使いません。
+
+```sh
+npm run fetch                    # horses.json の全馬（1 頭あたり最大 8 枚）
+npm run fetch -- イクイノックス   # 指定した馬だけ
+```
+
+- 馬を増やすときは `horses.json` に `{ "name": "馬名", "commons": "Commons のカテゴリ名" }` を追加します。
+  カテゴリ名は `https://commons.wikimedia.org/wiki/Category:Equinox_(horse)` の `Category:` より後ろの部分です。
+- 取り込むと写真と一緒に `.json`（撮影者・ライセンス）が保存され、LGTM 画像の下端にクレジットが入ります。
+- 馬が写っていない写真などを外すときは、その pageid を `horses.json` の `exclude` に足してファイル（.jpg と .json）を消し、もう一度 `npm run fetch` すると別の写真で補充されます。
+- 合成後の画像は元画像のライセンスに従います（CC BY-SA のものは CC BY-SA）。
+
+## 画像の追加（自分の写真）
 
 `photos/` に写真を置いて push するだけです。GitHub Actions が LGTM を合成して GitHub Pages に公開します。
 

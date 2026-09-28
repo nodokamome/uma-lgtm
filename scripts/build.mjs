@@ -5,6 +5,9 @@
 //
 // 出力ファイル名は元画像の内容ハッシュなので、デザインを変えて再ビルドしても
 // 過去の PR に貼った URL は変わらない。
+//
+// 写真と同名の .json（fetch-commons.mjs が作る）があれば、撮影者とライセンスを
+// 画像の下端に入れる。PR に貼った画像単体でもクレジットが残るようにするため。
 
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -33,7 +36,29 @@ const GLYPHS = [
 ];
 const TEXT_WIDTH = GLYPHS.reduce((sum, g) => sum + g.w, 0) + GAP * (GLYPHS.length - 1);
 
-function overlaySvg(width, height) {
+const escapeXml = (s) =>
+  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c]);
+
+function creditText(credit) {
+  const artist = credit.artist.replace(/\s*\(talk\)$/, '');
+  const by = artist && artist !== 'Own work' ? `Photo: ${artist.length > 36 ? `${artist.slice(0, 35)}…` : artist} / ` : '';
+  return `${by}${credit.license} / Wikimedia Commons (modified)`;
+}
+
+function creditSvg(width, height, credit) {
+  if (!credit) return '';
+  const text = creditText(credit);
+  // 文字幅をざっくり見積もり（全角 1em・半角 0.58em）、はみ出すなら文字を小さくする
+  const em = [...text].reduce((sum, c) => sum + (c.charCodeAt(0) > 0x2e7f ? 1 : 0.58), 0);
+  const pad = 8;
+  const size = Math.max(8, Math.min(Math.round(width * 0.022), Math.floor((width - pad * 2) / em)));
+  const bar = Math.round(size * 1.8);
+  return `<rect x="0" y="${height - bar}" width="${width}" height="${bar}" fill="#000" fill-opacity="0.45"/>
+  <text x="${pad}" y="${height - Math.round(bar * 0.32)}" font-size="${size}" fill="#fff" fill-opacity="0.92"
+    font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">${escapeXml(text)}</text>`;
+}
+
+function overlaySvg(width, height, credit) {
   const scale = Math.min((width * 0.72) / TEXT_WIDTH, (height * 0.34) / 100);
   const tx = (width - TEXT_WIDTH * scale) / 2;
   const ty = (height - 100 * scale) / 2;
@@ -54,6 +79,7 @@ function overlaySvg(width, height) {
     <g ${common} stroke="#1b1b1b" stroke-opacity="0.7" stroke-width="${STROKE + 9}" filter="url(#s)">${paths}</g>
     <g ${common} stroke="#fff" stroke-width="${STROKE}">${paths}</g>
   </g>
+  ${creditSvg(width, height, credit)}
 </svg>`);
 }
 
@@ -99,13 +125,18 @@ async function build() {
     if (seen.has(id)) continue;
     seen.add(id);
 
+    const credit = await fs
+      .readFile(file.replace(/\.[^.]+$/, '.json'), 'utf8')
+      .then(JSON.parse)
+      .catch(() => null);
+
     const { data, info } = await sharp(buf)
       .rotate()
       .resize(MAX_SIZE, MAX_SIZE, { fit: 'inside', withoutEnlargement: true })
       .toBuffer({ resolveWithObject: true });
 
     await sharp(data)
-      .composite([{ input: overlaySvg(info.width, info.height) }])
+      .composite([{ input: overlaySvg(info.width, info.height, credit) }])
       .jpeg({ quality: 85, mozjpeg: true })
       .toFile(path.join(OUT_DIR, `${id}.jpg`));
 
@@ -116,6 +147,12 @@ async function build() {
       width: info.width,
       height: info.height,
       addedAt: addedAt(file, await fs.stat(file)),
+      credit: credit && {
+        text: creditText(credit),
+        source: credit.source,
+        license: credit.license,
+        licenseUrl: credit.licenseUrl,
+      },
     });
     console.log(`  ${id}  ${path.relative(PHOTOS_DIR, file)}`);
   }

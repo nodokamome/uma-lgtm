@@ -111,13 +111,23 @@ function renderGrid() {
           <img loading="lazy" decoding="async" alt="">
           <span class="card__hint">クリックでコピー</span>
         </button>
-        <span class="card__name"></span>`;
+        <div class="card__meta">
+          <span class="card__name"></span>
+          <a class="card__credit" target="_blank" rel="noopener" hidden></a>
+        </div>`;
       const img = li.querySelector('img');
       img.src = image.src;
       img.width = image.width;
       img.height = image.height;
       img.alt = `LGTM - ${image.name}`;
       li.querySelector('.card__name').textContent = image.name;
+      if (image.credit) {
+        const a = li.querySelector('.card__credit');
+        a.hidden = false;
+        a.href = image.credit.source;
+        a.textContent = image.credit.license;
+        a.title = image.credit.text;
+      }
       li.querySelector('.card__btn').addEventListener('click', () => copy(image));
       return li;
     }),

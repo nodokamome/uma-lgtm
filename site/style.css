@@ -217,13 +217,33 @@ button, select { font: inherit; color: inherit; }
 .card__btn:hover .card__hint,
 .card__btn:focus-visible .card__hint { opacity: 1; }
 .card__btn:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
-.card__name {
-  display: block;
+.card__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
   border-top: 3px solid var(--turf-soft);
 }
+.card__name { font-size: 0.85rem; font-weight: 600; }
+.card__credit {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.card__credit:hover { color: var(--turf-strong); text-decoration: underline; }
+
+.footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.footer p { margin: 0 0 6px; }
+.footer a { color: inherit; }
 
 .toast {
   position: fixed;

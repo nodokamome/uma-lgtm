@@ -5,6 +5,7 @@
   "description": "競走馬の LGTM 画像ジェネレーター",
   "type": "module",
   "scripts": {
+    "fetch": "node scripts/fetch-commons.mjs",
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs"
   },
